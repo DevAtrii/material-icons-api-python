@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore and download Material Design icons in various styles and formats. Search, preview, and download icons for your projects.">
+    <meta name="keywords" content="material icons, material design, svg icons, icon explorer, icon download, icon converter">
+    <meta name="author" content="DevAtrii">
+    <meta property="og:title" content="Material Icons Explorer">
+    <meta property="og:description" content="Explore and download Material Design icons in various styles and formats.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/DevAtrii/material-icons-api-python">
+    <title>Material Icons Explorer | DevAtrii</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Smooth transitions */
+        .transition-all {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Card animations */
+        .icon-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+        .icon-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .gradient-bg-dark {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        
+        /* Glass effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Modal animations */
+        .modal-enter {
+            animation: modalEnter 0.3s ease-out forwards;
+        }
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* Loading animation */
+        .loading-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        
+        /* Button hover effects */
+        .btn-hover-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-hover-effect::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn-hover-effect:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" x-data="iconExplorer()">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0 flex items-center">
+                    <div class="mr-4 bg-white/10 p-2 rounded-lg">
+                        <i class="fas fa-icons text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Material Icons Explorer</h1>
+                        <p class="text-gray-200 text-sm md:text-base mt-1">Search, preview, and download Material Design icons</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://github.com/DevAtrii/material-icons-api-python" target="_blank" class="glass-effect px-4 py-2 rounded-lg flex items-center hover:bg-white/20 transition-all btn-hover-effect">
+                        <i class="fab fa-github mr-2"></i> GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <!-- Search Section -->
+        <section class="container mx-auto px-4 py-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        x-model="searchQuery" 
+                        @input.debounce.300ms="searchIcons()"
+                        placeholder="Search for icons (e.g., account, home, settings)" 
+                        class="w-full px-6 py-4 text-lg rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm transition-all"
+                    >
+                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button 
+                        @click="filterByStyle(null)" 
+                        :class="{'bg-indigo-600 text-white': selectedStyle === null, 'bg-gray-200 text-gray-700': selectedStyle !== null}"
+                        class="px-4 py-2 rounded-lg transition-all btn-hover-effect">
+                        All Styles
+                    </button>
+                    <template x-for="style in availableStyles" :key="style">
+                        <button 
+                            @click="filterByStyle(style)" 
+                            :class="{'bg-indigo-600 text-white': selectedStyle === style, 'bg-gray-200 text-gray-700': selectedStyle !== style}"
+                            class="px-4 py-2 rounded-lg transition-all btn-hover-effect">
+                            <span x-text="style.charAt(0).toUpperCase() + style.slice(1)"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="container mx-auto px-4 py-8">
+            <!-- Loading State -->
+            <div x-show="loading" class="flex flex-col justify-center items-center py-20">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+                <p class="text-gray-500 text-lg loading-pulse">Searching for icons...</p>
+            </div>
+            
+            <!-- No Results State -->
+            <div x-show="!loading && filteredIcons.length === 0" class="text-center py-20">
+                <div class="text-gray-500 text-xl">
+                    <i class="fas fa-search fa-3x mb-4"></i>
+                    <p>No icons found. Try a different search term.</p>
+                </div>
+            </div>
+            
+            <!-- Results Grid -->
+            <div x-show="!loading && filteredIcons.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <template x-for="icon in paginatedIcons" :key="icon.name">
+                    <div class="icon-card bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center cursor-pointer" @click="selectIcon(icon)">
+                        <div class="w-16 h-16 flex items-center justify-center mb-2">
+                            <img :src="'/icon/' + icon.name + '?style=' + (selectedStyle || 'baseline')" :alt="icon.name" class="w-12 h-12">
+                        </div>
+                        <p class="text-sm text-center text-gray-700 truncate w-full" x-text="icon.name"></p>
+                        <div class="mt-2 flex space-x-1">
+                            <template x-for="variant in icon.varients" :key="variant">
+                                <span class="w-2 h-2 rounded-full" :class="{'bg-indigo-500': variant === selectedStyle, 'bg-gray-300': variant !== selectedStyle}"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <!-- Pagination -->
+            <div x-show="!loading && filteredIcons.length > 0" class="mt-8 flex justify-center">
+                <div class="flex space-x-2">
+                    <button 
+                        @click="currentPage--" 
+                        :disabled="currentPage === 1"
+                        :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                        class="px-3 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <template x-for="page in totalPages" :key="page">
+                        <button 
+                            @click="currentPage = page" 
+                            :class="{'bg-indigo-600 text-white': currentPage === page, 'bg-gray-200 text-gray-700': currentPage !== page}"
+                            class="px-3 py-1 rounded-lg hover:bg-indigo-700 hover:text-white transition-all">
+                            <span x-text="page"></span>
+                        </button>
+                    </template>
+                    
+                    <button 
+                        @click="currentPage++" 
+                        :disabled="currentPage === totalPages"
+                        :class="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+                        class="px-3 py-1 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Icon Preview Modal -->
+    <div x-show="selectedIcon" x-cloak class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl modal-enter" @click.away="selectedIcon = null">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800" x-text="selectedIcon ? selectedIcon.name : ''"></h2>
+                <button @click="selectedIcon = null" class="text-gray-500 hover:text-gray-700 transition-all">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="flex-1 flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl">
+                    <div class="w-32 h-32 flex items-center justify-center mb-4 bg-white rounded-lg shadow-sm">
+                        <img :src="'/icon/' + selectedIcon?.name + '?style=' + (selectedStyle || 'baseline')" :alt="selectedIcon?.name" class="w-24 h-24" id="iconPreview">
+                    </div>
+                    
+                    <div class="flex flex-wrap justify-center gap-2 mb-4">
+                        <template x-for="variant in selectedIcon?.varients" :key="variant">
+                            <button 
+                                @click="selectedStyle = variant" 
+                                :class="{'bg-indigo-600 text-white': selectedStyle === variant, 'bg-gray-200 text-gray-700': selectedStyle !== variant}"
+                                class="px-3 py-1 rounded-lg text-sm transition-all btn-hover-effect">
+                                <span x-text="variant.charAt(0).toUpperCase() + variant.slice(1)"></span>
+                            </button>
+                        </template>
+                    </div>
+                    
+                    <div class="text-center text-gray-600 text-sm">
+                        <p>Click the download buttons below to save this icon</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-3">Download Options</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                            <div>
+                                <h4 class="font-medium">SVG Format</h4>
+                            </div>
+                            <a :href="'/icon/' + selectedIcon?.name + '?style=' + (selectedStyle || 'baseline')" download class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all btn-hover-effect">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </a>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                            <div>
+                                <h4 class="font-medium">PNG Format</h4>
+                            </div>
+                            <button @click="downloadAs('png')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all btn-hover-effect">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                            <div>
+                                <h4 class="font-medium">JPG Format</h4>
+                            </div>
+                            <button @click="downloadAs('jpg')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all btn-hover-effect">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all">
+                            <div>
+                                <h4 class="font-medium">WebP Format</h4>
+                            </div>
+                            <button @click="downloadAs('webp')" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all btn-hover-effect">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-3">Icon Details</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-600"><span class="font-medium">Name:</span> <span x-text="selectedIcon?.name"></span></p>
+                            <p class="text-sm text-gray-600"><span class="font-medium">Available Styles:</span> <span x-text="selectedIcon?.varients.join(', ')"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="gradient-bg-dark text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center mb-2">
+                        <div class="mr-2 bg-white/10 p-2 rounded-lg">
+                            <i class="fas fa-icons"></i>
+                        </div>
+                        <h2 class="text-xl font-bold">Material Icons Explorer</h2>
+                    </div>
+                    <p class="text-gray-400 mt-1">Created by <a href="https://github.com/DevAtrii" target="_blank" class="text-indigo-300 hover:text-indigo-200 transition-all">DevAtrii</a></p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/DevAtrii/material-icons-api-python" target="_blank" class="text-gray-400 hover:text-white transition-all">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400 text-sm">
+                <p>© 2023 DevAtrii. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function iconExplorer() {
+            return {
+                searchQuery: '',
+                icons: [],
+                filteredIcons: [],
+                selectedIcon: null,
+                selectedStyle: null,
+                availableStyles: ['baseline', 'outline', 'round', 'sharp', 'twotone'],
+                loading: false,
+                currentPage: 1,
+                itemsPerPage: 24,
+                
+                init() {
+                    this.searchIcons();
+                },
+                
+                async searchIcons() {
+                    if (!this.searchQuery) {
+                        this.filteredIcons = [];
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    try {
+                        const styleParam = this.selectedStyle ? `&style=${this.selectedStyle}` : '';
+                        const response = await fetch(`/search/${this.searchQuery}${styleParam}`);
+                        const data = await response.json();
+                        
+                        if (data.status) {
+                            this.icons = data.data;
+                            this.filterIcons();
+                        } else {
+                            this.icons = [];
+                            this.filteredIcons = [];
+                        }
+                    } catch (error) {
+                        console.error('Error searching icons:', error);
+                        this.icons = [];
+                        this.filteredIcons = [];
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                filterIcons() {
+                    if (this.selectedStyle) {
+                        this.filteredIcons = this.icons.filter(icon => 
+                            icon.varients.some(v => v.toLowerCase() === this.selectedStyle.toLowerCase())
+                        );
+                    } else {
+                        this.filteredIcons = this.icons;
+                    }
+                    
+                    this.currentPage = 1;
+                },
+                
+                filterByStyle(style) {
+                    this.selectedStyle = style;
+                    this.filterIcons();
+                },
+                
+                selectIcon(icon) {
+                    this.selectedIcon = icon;
+                },
+                
+                get paginatedIcons() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    return this.filteredIcons.slice(start, end);
+                },
+                
+                get totalPages() {
+                    return Math.ceil(this.filteredIcons.length / this.itemsPerPage);
+                },
+                
+                async downloadAs(format) {
+                    const iconElement = document.getElementById('iconPreview');
+                    if (!iconElement) return;
+                    
+                    try {
+                        const canvas = await html2canvas(iconElement, {
+                            backgroundColor: null,
+                            scale: 2
+                        });
+                        
+                        let dataUrl;
+                        if (format === 'png') {
+                            dataUrl = canvas.toDataURL('image/png');
+                        } else if (format === 'jpg') {
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                        } else if (format === 'webp') {
+                            dataUrl = canvas.toDataURL('image/webp');
+                        }
+                        
+                        const link = document.createElement('a');
+                        link.download = `${this.selectedIcon.name}_${this.selectedStyle || 'baseline'}.${format}`;
+                        link.href = dataUrl;
+                        link.click();
+                    } catch (error) {
+                        console.error('Error converting icon:', error);
+                        alert('Failed to convert icon. Please try again.');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html> 

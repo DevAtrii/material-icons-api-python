@@ -14,8 +14,8 @@ A Flask-based API service for serving Material Design icons as SVG files. This p
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/devatrii/material-icons-python.git
-cd material-icons-python
+git clone https://github.com/devatrii/material-icons-api-python.git
+cd material-icons-api-python
 ```
 
 2. Install dependencies:

@@ -1,8 +1,14 @@
 from main import ICONS_DATABASE, app
 from py_utils.common_utils.file_utils import sanitize_file_name
 from py_utils.flask_utils.jsonify_utils import success_response, error_response
-from flask import send_file, request
+from flask import send_file, request, render_template
 import os
+
+
+@app.route('/')
+@app.route('/explorer')
+def route_explorer():
+    return render_template('explorer.html')
 
 
 @app.route('/search/<path:query>', methods=['GET'])
@@ -24,6 +30,7 @@ def route_search_icon(query: str):
         # Check if the requested style exists in the icon's varients array
         if style.lower() in [v.lower() for v in icon.get('varients', [])]:
             filtered_icons.append(icon)
+            
     if not filtered_icons:
         return error_response(message=f'Icons Not Found for query: {query} & style: {style}')
     return success_response(data=filtered_icons)
@@ -36,6 +43,7 @@ def route_view_icon(icon: str):
     
     # Construct the path based on whether style is provided
     path = f'svg/{sanitize_file_name(icon)}/{sanitize_file_name(style)}.svg'
+    print(path)
     if not os.path.exists(path):
         return error_response(message=f'Icon not found: {icon}')
         
