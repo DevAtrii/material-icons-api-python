@@ -14,6 +14,13 @@ CORS(app, resources={
 
 ICONS_DATABASE = open_file_as_json(path='icons_db.json')
 
+# Add global cache headers
+@app.after_request
+def add_cache_headers(response):
+    # Default cache control for API responses (1 hour)
+    response.headers['Cache-Control'] = 'public, max-age=3600'
+    return response
+
 from api_routes import *
 
 if __name__ == '__main__':

@@ -47,11 +47,14 @@ def route_view_icon(icon: str):
     if not os.path.exists(path):
         return error_response(message=f'Icon not found: {icon}')
         
-    return send_file(
+    response = send_file(
         path,
         mimetype='image/svg+xml',
         as_attachment=False
     )
+    # Set longer cache duration for static SVG files (1 day)
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
 
 
 
